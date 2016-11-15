@@ -357,7 +357,22 @@ WHERE fecha_nac IN (SELECT MAX(fecha_nac)
                                                                             WHERE cod_gen IN (SELECT G.cod_gen
                                                                                               FROM cs_genero G
                                                                                               WHERE g.cod_gen='DD8')))));
- 
+-- 32.Obtener el código y el nombre de los países con actores
+--y tales que todos los actores de ese país han
+--nacido en el siglo XX (ordenados por nombre).
+SELECT P.cod_pais, P.nombre
+FROM cs_pais P
+WHERE NOT EXISTS(SELECT *
+                  FROM cs_actor A
+                  WHERE ( EXTRACT(YEAR FROM A.fecha_nac) < 1900
+                  OR EXTRACT(YEAR FROM A.fecha_nac) > 1999)
+                  AND A.cod_pais=P.cod_pais)  
+AND EXISTS (SELECT *
+            FROM cs_actor AC
+            WHERE AC.cod_pais=P.cod_pais)
+ORDER BY(P.nombre);
+                 
+
 --33.List the code and name of the actors such that all their roles have been 'Secundario'.
 --We are only interested in actors who have acted in some movie
 SELECT DISTINCT A.nombre,A.cod_act
@@ -367,3 +382,48 @@ WHERE NOT EXISTS ( SELECT *
                 WHERE A.cod_act = I.cod_act
                 AND NOT I.papel = 'Secundario')
 AND a.cod_act=T.cod_act;
+
+
+--34. Obtener el código y el nombre de los actores que han aparecido 
+--en todas las películas del director ‘Guy
+--Ritchie’ (sólo si ha dirigido al menos una).
+
+SELECT A.nombre ,A.cod_act
+FROM cs_actor A
+WHERE  A.cod_act IN( SELECT AT.cod_act
+                      FROM cs_actua AT
+                      WHERE AT.cod_peli NOT IN
+                                      (SELECT P.cod_peli
+                                         FROM cs_pelicula P
+                                          WHERE  P.director<>'Guy Ritchie'))
+  AND EXISTS (SELECT *
+              FROM cs_pelicula PE
+              WHERE PE.director='Guy Ritchie');
+              
+  --official solution
+  
+  SELECT A.cod_act,A.nombre
+  FROM cs_actor A
+  WHERE NOT EXISTS (SELECT *
+                    FROM cs_pelicula P
+                    WHERE P.director='Guy Ritchie'
+                    AND NOT EXISTS (SELECT *
+                                    FROM cs_Actua AC
+                                    WHERE AC.cod_act=A.cod_act
+                                    AND AC.cod_peli=P.cod_peli))
+  AND EXISTS (SELECT *
+              FROM cs_pelicula p2
+              WHERE p2.director='Guy Ritchie');
+  
+  --46. Obtener el código, el título y el autor del libro en 
+  --el que se han basado más películas (puede haber más
+--de uno).
+
+
+  
+              
+  --47.Obtener el código y el nombre del país que más
+  --actores tiene que hayan participado exactamente en 2
+--películas
+
+
