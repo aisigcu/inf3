@@ -414,7 +414,77 @@ WHERE  A.cod_act IN( SELECT AT.cod_act
   AND EXISTS (SELECT *
               FROM cs_pelicula p2
               WHERE p2.director='Guy Ritchie');
-  
+  --35. Write	a	query	for	the	previous	problem	but	using the	
+  --director	named	‘John	Steel’.
+SELECT A.cod_act,A.nombre
+  FROM cs_actor A
+  WHERE NOT EXISTS (SELECT *
+                    FROM cs_pelicula P
+                    WHERE P.director='John Steel'
+                    AND NOT EXISTS (SELECT *
+                                    FROM cs_Actua AC
+                                    WHERE AC.cod_act=A.cod_act
+                                    AND AC.cod_peli=P.cod_peli))
+  AND EXISTS (SELECT *
+              FROM cs_pelicula p2
+              WHERE p2.director='John Steel');
+              
+              
+  --36. List	the	code	and title of	the	movies	with
+  --a	length shorter	than	100	minutes	in	which	all	the	actors	who	
+--have	acted are	from	the	same	country.
+SELECT P.cod_peli,P.titulo
+FROM cs_pelicula P
+WHERE NOT EXISTS  (SELECT *
+                  FROM cs_actor AC,cs_actua AR
+                  WHERE AC.cod_pais <> ANY(SELECT AT.cod_pais
+                                          FROM cs_actor AT,cs_actua A
+                                          WHERE AT.cod_act=A.cod_act
+                                          AND A.cod_peli=P.cod_peli)
+                  AND AC.cod_act=AR.cod_Act
+                  AND AR.cod_peli=P.cod_peli)
+AND P.duracion<100
+AND EXISTS (SELECT *
+            FROM cs_actor R,cs_actua T
+            WHERE R.cod_act=T.cod_act
+            AND T.cod_peli=P.cod_peli)
+ORDER BY P.titulo;
+
+--37. List	the	code,	title,	and	year	of	release	of	the	movies	in
+--which	some	actor	has	acted,	but	only	if	all	the	
+--actors	of	that movie	were	born	before	1943
+SELECT P.cod_peli,P.titulo,P.anyo
+FROM cs_pelicula P
+WHERE EXISTS (SELECT *
+              FROM cs_actua A
+              WHERE P.cod_peli=A.cod_peli)
+AND NOT EXISTS (SELECT *
+                FROM cs_actua AT,cs_actor AC
+                WHERE AT.cod_peli=P.cod_peli
+                AND AT.cod_act=AC.cod_act
+                AND EXTRACT(YEAR FROM AC.fecha_nac)>=1943)
+                ORDER BY P.titulo;
+--38. List	the	code	and	name	of	all	the	countries	if	
+--all	the	actors from	that	country	have	acted	in	at least	one	
+--movie	with	a	length greater	than	120	minutes	(sorted	by	name).      
+SELECT PA.cod_pais,PA.nombre
+FROM cs_pais PA
+WHERE NOT EXISTS (SELECT *
+                  FROM cs_actor A
+                  WHERE A.cod_pais=PA.cod_pais
+                  AND A.cod_act NOT IN (SELECT AC.cod_act
+                                      FROM cs_actua AC     
+                                      WHERE AC.cod_peli in (SELECT P.cod_peli
+                                                            FROM cs_pelicula P
+                                                            WHERE P.duracion>=120)) )
+  AND EXISTS(SELECT *
+              FROM cs_actor AP
+              WHERE PA.cod_pais=AP.cod_pais
+              AND AP.cod_act IN (SELECT ACP.cod_act
+                                  FROM cs_actua ACP
+                                  WHERE ACP.cod_peli IN (SELECT PI.cod_peli
+                                                        FROM cs_pelicula PI
+                                                        WHERE PI.duracion>=120))) ;
   --46. Obtener el código, el título y el autor del libro en 
   --el que se han basado más películas (puede haber más
 --de uno).
@@ -425,5 +495,3 @@ WHERE  A.cod_act IN( SELECT AT.cod_act
   --47.Obtener el código y el nombre del país que más
   --actores tiene que hayan participado exactamente en 2
 --películas
-
-
