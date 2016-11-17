@@ -484,7 +484,49 @@ WHERE NOT EXISTS (SELECT *
                                   FROM cs_actua ACP
                                   WHERE ACP.cod_peli IN (SELECT PI.cod_peli
                                                         FROM cs_pelicula PI
-                                                        WHERE PI.duracion>=120))) ;
+                                                        WHERE PI.duracion>=120));
+                                                        
+                                                        
+-- 39. List	 the	 code	and	title of	 the	 book	 (or	 books) 
+--used	in	more	 than	 one	movie.	Include	also how many	
+--movies	have	been	based	on	that book. 
+
+SELECT L.cod_lib, L.titulo,COUNT(P.cod_lib) CUANTAS
+FROM cs_libro L, cs_pelicula P
+WHERE P.cod_lib=L.cod_lib
+GROUP BY L.cod_lib,L.titulo
+HAVING COUNT(P.cod_lib)>1;
+
+--40. List	 for	 each	 genre	 with	 more	 than	 5	 movies,
+--the	 code	 and the	 name of	 the	 genre,	 including	 the	
+--amount	of	movies	of	that	genre and	the	average	length 
+--of	all	that	movies. (sorted by	name).	You	can	
+--use	the	ROUND	function
+
+SELECT G.cod_gen,G.nombre,COUNT (P.cod_peli) NUMPELI , ROUND (AVG(P.duracion))
+FROM cs_genero G,cs_pelicula P, cs_clasificacion C
+WHERE G.cod_gen=C.cod_gen
+AND C.cod_peli=P.cod_peli
+GROUP BY G.cod_gen,G.nombre
+HAVING COUNT(C.cod_gen)>5
+ORDER BY (G.nombre);
+
+--41. List	the	code	and	title of	the	movies released	
+--after the	2000 year,	and	how	many	genres they	have	(if	
+--they	have	genre) sorted	by	title.
+
+SELECT P.cod_peli, P.titulo , COUNT (G.nombre)NUMGENERES
+FROM cs_pelicula P, cs_genero G, cs_clasificacion C
+WHERE C.cod_gen=G.cod_gen
+AND C.cod_peli=P.cod_peli
+AND P.anyo>2000
+GROUP BY P.cod_peli, P.titulo
+HAVING COUNT(G.nombre)>0;
+
+--42. List	the	directors	who	have	directed	two	(exactly 2)	
+--movies	whose name	contains the	string	‘George’
+
+
   --46. Obtener el código, el título y el autor del libro en 
   --el que se han basado más películas (puede haber más
 --de uno).
