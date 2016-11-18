@@ -527,10 +527,30 @@ HAVING COUNT(G.nombre)>0;
 --movies	whose name	contains the	string	‘George’
 
 
-  --46. Obtener el código, el título y el autor del libro en 
-  --el que se han basado más películas (puede haber más
---de uno).
+ --45. List	the	code (or	codes)	and	the	genre	(or	genres)
+--with	most movies
 
+SELECT G.cod_gen,G.nombre
+FROM cs_genero G  ,cs_clasificacion C
+WHERE C.cod_gen=G.cod_gen
+GROUP BY G.cod_gen,G.nombre
+HAVING COUNT(DISTINCT C.cod_peli)>= ALL ( SELECT COUNT (DISTINCT cod_peli)
+                                          FROM cs_clasificacion 
+                                          GROUP BY cod_gen);
+
+
+--46. List	the	code/s,	title/s	and	author/s	of	
+--the	book	most	used	in	movies
+
+SELECT L.cod_lib,L.titulo,L.autor
+FROM cs_libro L,cs_pelicula P
+WHERE P.cod_lib=L.cod_lib
+GROUP BY L.cod_lib,L.titulo,L.autor
+HAVING COUNT(L.cod_lib)>= ALL (SELECT COUNT ( LI.cod_lib)
+                                FROM cs_libro LI,cs_pelicula PE
+                                WHERE LI.cod_lib=PE.cod_lib
+                                GROUP BY LI.cod_lib);
+                                
 
   
               
