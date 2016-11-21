@@ -557,3 +557,52 @@ HAVING COUNT(L.cod_lib)>= ALL (SELECT COUNT ( LI.cod_lib)
   --47.Obtener el código y el nombre del país que más
   --actores tiene que hayan participado exactamente en 2
 --películas
+
+--48. List	the	year	(or	years)	in	which	more
+--than	3	actors	were	born,	indicating	how	many	actors	were	born
+--in	that	year
+
+SELECT EXTRACT (YEAR FROM fecha_nac), COUNT(cod_act) NUM
+FROM cs_actor
+GROUP BY(EXTRACT(YEAR FROM fecha_nac))
+HAVING COUNT (cod_Act)>3;
+
+.--49. Do	again	the	query	36.
+--36. List	the	code	and title of	the	movies	with	a	length shorter
+--than	100	minutes	in	which	all	the	actors	who	
+--have	acted are	from	the	same	country.
+
+SELECT P.cod_peli,P.titulo
+FROM cs_pelicula P,cs_actor A,cs_Actua AC
+WHERE P.duracion <100
+AND P.cod_peli=AC.cod_peli
+AND AC.cod_act=A.cod_act
+GROUP BY P.cod_peli,P.titulo
+HAVING COUNT(DISTINCT A.cod_pais)<2;
+
+--50. List	for	all	the	countries	in	the	database,	
+--the	code,	name,	and	amount	of	actors	in	each	country
+
+SELECT cod_pais,P.nombre, COUNT(cod_act)
+FROM cs_pais P LEFT JOIN cs_actor USING (cod_pais)
+GROUP BY cod_pais,P.nombre;
+
+
+--51. List	 the	 code	and	 the	title of	all	 the	
+--books	in	 the	 database	 published	after	 1980,	
+--and	 the	amount	 of	movies	based	on	each	book.
+
+SELECT cod_lib,L.titulo, COUNT (P.cod_peli)
+FROM cs_libro L LEFT JOIN cs_pelicula P USING(cod_lib)
+WHERE L.anyo>1980
+GROUP BY cod_lib,L.titulo;
+
+--52. List	for	all	the	countries in	the	database,	
+--the	code,	name	and	amount	of	actors	from	that	country	who	
+--have	performed	the “Secundario”	role in	some	movie.
+
+SELECT cod_pais,PA.nombre,COUNT(DISTINCT A.cod_act)
+FROM cs_pais PA LEFT JOIN cs_actor A USING (cod_pais),cs_actua AC
+WHERE A.cod_act=AC.cod_Act
+AND AC.papel='Secundario'
+GROUP BY  cod_pais , PA.nombre
