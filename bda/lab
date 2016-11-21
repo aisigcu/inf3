@@ -606,3 +606,52 @@ FROM cs_pais PA LEFT JOIN cs_actor A USING (cod_pais),cs_actua AC
 WHERE A.cod_act=AC.cod_Act
 AND AC.papel='Secundario'
 GROUP BY  cod_pais , PA.nombre
+
+--53. List	 for	all	 the	movies	in	 the	
+--database	longer	 tan	 140	minutes,	its	 
+--code,	title,	amount	 of	 genres and	
+--amount	of	actors	acting	in	that	movie.
+-- MAL! no incluye los que no tienen actores o no tiene generos, hay que hacerlo con joins
+SELECT p.cod_peli,P.titulo,COUNT(DISTINCT A.cod_act) ACT,COUNT (DISTINCT C.cod_gen) GEN 
+FROM cs_pelicula P,cs_clasificacion C,cs_actua A
+WHERE P.duracion >140
+AND P.cod_peli=A.cod_peli
+AND P.cod_peli=C.cod_peli
+GROUP BY P.cod_peli,P.titulo
+ORDER BY P.titulo;
+
+SELECT cod_peli,P.titulo,COUNT(DISTINCT A.cod_act) ACT,COUNT (DISTINCT C.cod_gen) GEN 
+FROM (cs_pelicula P LEFT JOIN cs_clasificacion C USING(cod_peli))
+  LEFT JOIN cs_actua A USING (cod_peli)
+  WHERE P.duracion > 140
+  GROUP BY cod_peli,P.titulo
+  ORDER BY titulo;
+  
+ -- 54. List	 the	 years,	 in	 ascending	 order,	
+ --of	 all	 the	 years in	 which	 a	 book	 was	
+ --published	 or a	 movie	 was	
+--released.	We	are	only	interested	in	years	without	the	digit	9.
+
+SELECT P.anyo
+FROM cs_Pelicula P
+WHERE P.anyo NOT LIKE '%9%'
+UNION
+SELECT L.anyo
+FROM cs_libro L
+WHERE L.anyo NOT LIKE '%9%';
+
+--55. List	the	name	of	the	genre (or	genres)	of	the	longest	movie.
+
+SELECT G.nombre
+FROM cs_genero G, cs_clasificacion C, cs_pelicula P
+WHERE P.cod_peli=C.cod_peli
+AND C.cod_gen=G.cod_gen
+AND P.duracion >= ALL (SELECT PE.duracion
+                      FROM cs_pelicula PE
+                      );
+                      
+--56. List,	 for	each	 actor	 born	 before	 1948
+--who has	acted	 in	 2	 or	more	movies	 in	any	 role,	 the	 code,	 the	
+--name	and	the	date	of	birth,	indicating	in	
+--how	many	movies	he/she	has	performed	the ‘Principal’ role.
+
