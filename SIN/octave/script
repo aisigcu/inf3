@@ -1,0 +1,63 @@
+#!/bin/octave
+load("OCR_14x14"); [N,L]=size(data); D=L-1;
+ll=unique(data(:,L)); C=numel(ll);
+rand("seed",23); data=data(randperm(N),:);
+[w,E,k]=perceptron(data(1:round(.7
+*
+N),:));
+save_precision(4); save("percep_w","w");
+output_precision(2); w
+
+#error estimation
+load("OCR_14x14");
+[N,L]=size(data); D=L-1;
+ll=unique(data(:,L));
+C=numel(ll); rand("seed",23);
+data=data(randperm(N),:);
+M=N-round(.7*N); te=data(N-M+1:N,:);
+load("percep_w"); rl=zeros(M,1);
+for m=1:M
+	tem=[1 te(m,1:D)]';
+	rl(m)=ll(linmach(w,tem)); 
+end;
+[nerr m]=confus(te(:,L),rl)
+
+#
+nerr=17; M=300; output_precision(2);
+m=nerr/M
+s=sqrt(m*(1-m)/M)
+r=1.96*s
+printf("I=[%.3f, %.3f]\n",m-r,m+r);
+
+#!/usr/bin/octave -qf
+load("OCR_14x14"); 
+[N,L]=size(data); D=L-1;
+ll=unique(data(:,L)); C=numel(ll);
+rand("seed",23); data=data(randperm(N),:);
+NTr=round(.7
+*
+N); M=N-NTr; te=data(NTr+1:N,:);
+printf("#      a   E   k Ete\n");
+printf("#------- --- --- ---\n");
+for a=[.1 1 10 100 1000 10000 100000]
+[w,E,k]=perceptron(data(1:NTr,:),0.1,a); rl=zeros(M,
+1);
+for n=1:M rl(n)=ll(linmach(w,[1 te(n,1:D)]')); end
+[nerr m]=confus(te(:,L),rl);
+printf("%8.1f %3d %3d %3d\n",a,E,k,nerr);
+end
+#!/usr/bin/octave -qf
+load("OCR_14x14"); [N,L]=size(data); D=L-1;
+ll=unique(data(:,L)); C=numel(ll);
+rand("seed",23); data=data(randperm(N),:);
+NTr=round(.7
+*
+N); M=N-NTr; te=data(NTr+1:N,:);
+printf("#      b   E   k Ete\n");
+printf("#------- --- --- ---\n");
+for b=[.1 1 10 100 1000 10000 100000]
+[w,E,k]=perceptron(data(1:NTr,:),b); rl=zeros(M,1);
+for n=1:M rl(n)=ll(linmach(w,[1 te(n,1:D)]')); end
+[nerr m]=confus(te(:,L),rl);
+printf("%8.1f %3d %3d %3d\n",b,E,k,nerr);
+end
