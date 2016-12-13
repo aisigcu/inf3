@@ -1,0 +1,40 @@
+CREATE TABLE p2_departamento(cod_dep VarCHAR2(4) 
+CONSTRAINT PK_departamento PRIMARY KEY, nombre VARCHAR2(50) NOT NULL,
+telefono CHAR(8),director VARCHAR2(9));
+
+CREATE TABLE p2_asignatura (cod_asg VarCHAR2(5) CONSTRAINT PK_asignatura
+PRIMARY KEY, nombre VARCHAR2(50) NOT NULL UNIQUE, semestre
+VARCHAR2(2) NOT NULL, cod_dep VARCHAR2(4) NOT NULL CONSTRAINT FK_asignatura_departamento
+REFERENCES p2_departamento(cod_dep),
+teoria REAL NOT NULL, practicas REAL NOT NULL, CONSTRAINT IC1 CHECK (teoria >= practicas),
+CONSTRAINT IC2  CHECK (semestre IN('1A','1B','2A','2B','3A','3B','4A','4B')) );
+
+CREATE TABLE p2_profesor(dni VARCHAR2(9) CONSTRAINT PK_profesor PRIMARY KEY
+,nombre VARCHAR2(80) NOT NULL, telefono  VARCHAR2(8), cod_dep VARCHAR2(4)
+CONSTRAINT FK_profesor_departamento REFERENCES p2_departamento(cod_dep)
+, provincia VARCHAR2(25), edad INT );
+
+CREATE TABLE p2_docencia(dni VARCHAR2(9) CONSTRAINT PK_docencia PRIMARY KEY CONSTRAINT FK_docencia_profesor
+REFERENCES p2_profesor(dni), cod_asg VARCHAR2(5) NOT NULL UNIQUE CONSTRAINT FK_docencia_asignatura
+REFERENCES p2_asignatura(cod_asg),gteo INT  NOT NULL , gpra INT NOT NULL);
+
+ALTER TABLE p2_departamento ADD(director VARCHAR2(9) CONSTRAINT FK_departamento_profesor REFERENCES p2_profesor);
+
+ALTER TABLE p2_departamento Drop(director);
+
+CREATE TRIGGER trigGC AFTER INSERT ON p2_profesor 
+BEGIN SELECT COUNT(*) INTO vble
+      FROM p2_docencia D, p2_profesor P
+      WHERE p.dni = D.dni;
+      IF(vble =0 ) THEN RAISE_APPLICATION_ERROR(20213,'do not have lessons');
+   END IF;
+END;
+CREATE TRIGGER trigG2 AFTER DELETE OR UPDATE ON p2_docencia
+BEGIN SELECT COUNT(*) INTO vble
+      FROM p2_docencia D, p2_profesor P
+      WHERE p.dni = D.dni;
+      IF(vble =0 ) THEN RAISE_APPLICATION_ERROR(20211,'do not have lessons');
+   END IF;
+END;
+      
+DROP TRIGGER trigG2;
